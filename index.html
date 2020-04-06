@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Animal Crossing Turnip Price Forecaster - Google Sheet</title>
+<style>
+table {
+	border-collapse: collapse;
+}
+
+table, th, td {
+	border: 1px solid gray;
+}
+
+th, td {
+	padding: 3px;
+}
+</style>
+</head>
+<body>
+	<h3 id="user"></h3>
+    <table>
+      <caption>Your turnip prices will be one of the following patterns. Each cell contains the minimum..maximum price for that half-day. If you don't have a pattern, this likely means that this is the first week that you bought turnips from Daisy in your farm - and this tool won't work for you. Check back next week!</caption>
+      <thead>
+        <tr>
+          <th>Pattern</th>
+          <th>Sunday</th>
+          <th colspan="2">Monday</th>
+          <th colspan="2">Tuesday</th>
+          <th colspan="2">Wednesday</th>
+          <th colspan="2">Thursday</th>
+          <th colspan="2">Friday</th>
+          <th colspan="2">Saturday</th>
+        </tr>
+        <tr>
+          <th></th>
+          <th></th>
+          <th>AM</th>
+          <th>PM</th>
+          <th>AM</th>
+          <th>PM</th>
+          <th>AM</th>
+          <th>PM</th>
+          <th>AM</th>
+          <th>PM</th>
+          <th>AM</th>
+          <th>PM</th>
+          <th>AM</th>
+          <th>PM</th>
+        </tr>
+      </thead>
+      <tbody id="output">
+      </tbody>
+    </table>
+	<script src="https://mikebryant.github.io/ac-nh-turnip-prices/js/scripts.js"></script>
+	<script>
+	const url = new URL(window.location.href);
+	const key = url.searchParams.get("key");
+	const sheet = url.searchParams.get("sheet");
+	const range = url.searchParams.get("range");
+
+	const requestURL = 'https://sheets.googleapis.com/v4/spreadsheets/' + sheet + '/values/' + range + '?key=' + key;
+	console.log(requestURL);
+	let request = new XMLHttpRequest();
+	request.open('GET', requestURL);
+	request.responseType = 'json';
+	request.send();
+	request.onload = function() {
+	  const row = request.response.values[0];
+	  
+	  const buy_price = parseInt(row[1]);
+
+	  let sell_prices = [buy_price, buy_price];
+	  for (let i = 2; i < row.length; i++) {
+		sell_prices.push(parseInt(row[i]));
+	  }
+	  
+	  const is_empty = sell_prices.every(sell_price => !sell_price);
+	  if (is_empty) {
+		document.getElementById("output").innerHTML = "";
+		return;
+	  }
+
+	  let output_possibilities = "";
+	  for (let poss of generate_possibilities(sell_prices)) {
+		var out_line = "<tr><td>" + poss.pattern_description + "</td>"
+		for (let day of [...poss.prices].slice(1)) {
+		  if (day.min != day.max) {
+			out_line += "<td>" + day.min + ".." + day.max + "</td>"
+		  } else {
+			out_line += "<td>" + day.min + "</td>"
+		  }
+		}
+		out_line += "</tr>"
+		output_possibilities += out_line
+	  }
+	  
+	  document.getElementById("output").innerHTML = output_possibilities;
+	  document.getElementById("user").innerHTML = row[0];
+	}
+</script>
+</body>
+</html>
