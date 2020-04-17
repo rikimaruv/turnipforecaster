@@ -16,7 +16,14 @@ th, td {
 	padding: 3px;
 }
 </style>
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/i18next/19.4.2/i18next.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/i18next-xhr-backend/3.2.2/i18nextXHRBackend.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/i18next-browser-languagedetector/4.0.2/i18nextBrowserLanguageDetector.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-i18next/1.2.1/jquery-i18next.min.js"></script>
+  
 <script src="https://mikebryant.github.io/ac-nh-turnip-prices/js/predictions.js"></script>
+<script src="https://mikebryant.github.io/ac-nh-turnip-prices/js/translations.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.css">
@@ -121,7 +128,7 @@ th, td {
 		});
 	}
 	
-	function processRequest(request) {
+	function processRequest(request, previousPattern) {
 		const row = request.response.values[0];
 		const buy_price = parseInt(row[1]);
 		let sell_prices = [buy_price, buy_price];
@@ -138,8 +145,8 @@ th, td {
 		let output_possibilities = "";
 		let minLine = new Array(14);
 		let maxLine = new Array(14);
-		for (let poss of generate_possibilities(sell_prices)) {
-			let out_line = "<tr><td>" + poss.pattern_description + "</td>"
+		for (let poss of analyze_possibilities(sell_prices, 0, previousPattern)) {
+			let out_line = "<tr><td class='table-pattern'>" + poss.pattern_description + "</td>"
 			const prices = poss.prices;
 			for(let i = 1; i < prices.length; i++) {
 				const day = poss.prices[i];
@@ -175,14 +182,28 @@ th, td {
 	const url = new URL(window.location.href);
 	const key = url.searchParams.get("key");
 	const sheet = url.searchParams.get("sheet");
-	const range = url.searchParams.get("range");
+	const range = decodeURI(url.searchParams.get("range"));
+	const pattern_str = decodeURI(url.searchParams.get("previousPattern"));
+	
+	let previousPattern = -1;
+	if (pattern_str == "0" || pattern_str == "fluctuating") {
+		previousPattern = 0;
+	    } else if (pattern_str == "1" || pattern_str == "large-spike") {
+			previousPattern = 1;
+	    } else if (pattern_str == "2" || pattern_str == "decreasing") {
+			previousPattern = 2;
+	    } else if (pattern_str == "3" || pattern_str == "small-spike") {
+			previousPattern = 3;
+	    }
+	
+	console.log("previousPattern: " + pattern_str + " " + previousPattern);
 	
 	const requestURL = 'https://sheets.googleapis.com/v4/spreadsheets/' + sheet + '/values/' + range + '?key=' + key;
 	let request = new XMLHttpRequest();
 	request.open('GET', requestURL);
 	request.responseType = 'json';
 	request.send();
-	request.onload = function() { processRequest(request); };
+	request.onload = function() { processRequest(request, previousPattern);};
 </script>
 </body>
 </html>
