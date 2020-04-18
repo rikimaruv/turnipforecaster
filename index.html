@@ -10,6 +10,7 @@ table {
 
 table, th, td {
 	border: 1px solid gray;
+	min-width: 40pt;
 }
 
 th, td {
@@ -35,16 +36,18 @@ th, td {
 	<caption></caption>
 	<thead>
 	<tr>
-	  <th>Pattern</th>
-	  <th>Sunday</th>
-	  <th colspan="2">Monday</th>
-	  <th colspan="2">Tuesday</th>
-	  <th colspan="2">Wednesday</th>
-	  <th colspan="2">Thursday</th>
-	  <th colspan="2">Friday</th>
-	  <th colspan="2">Saturday</th>
+	  <th>Паттерн</th>
+	  <th>Вероятность</th>
+	  <th>Вс</th>
+	  <th colspan="2">Пн</th>
+	  <th colspan="2">Вт</th>
+	  <th colspan="2">Ср</th>
+	  <th colspan="2">Чт</th>
+	  <th colspan="2">Пт</th>
+	  <th colspan="2">Сб</th>
 	</tr>
 	<tr>
+	  <th></th>
 	  <th></th>
 	  <th></th>
 	  <th>AM</th>
@@ -150,8 +153,19 @@ th, td {
 		let output_possibilities = "";
 		let minLine = new Array(14);
 		let maxLine = new Array(14);
-		for (let poss of analyze_possibilities(sell_prices, 0, previousPattern)) {
+		const analyzed_possibilities = analyze_possibilities(sell_prices, 0, previousPattern);
+		let previous_pattern_number;
+		for (let poss of analyzed_possibilities) {
 			let out_line = "<tr><td class='table-pattern'>" + poss.pattern_description + "</td>"
+			if (previous_pattern_number != poss.pattern_number) {
+			  previous_pattern_number = poss.pattern_number;
+			  pattern_count = analyzed_possibilities
+				.filter(val => val.pattern_number == poss.pattern_number)
+				.length;
+			  percentage_display = percent => Number.isFinite(percent) ? ((percent * 100).toPrecision(3) + '%') : '—';
+			  
+			  out_line += "<td rowspan=" + pattern_count + ">" + percentage_display(poss.category_total_probability) + "</td>";
+			}
 			const prices = poss.prices;
 			for(let i = 1; i < prices.length; i++) {
 				const day = poss.prices[i];
