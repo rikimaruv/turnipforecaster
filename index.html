@@ -32,7 +32,7 @@ th, td {
 	<h3 id="user"></h3>
 	<div><canvas id="myChart" width="880" height="400" style="display: block; width: 880px; height: 400px;"></canvas></div>
 	<table>
-	<caption>Your turnip prices will be one of the following patterns. Each cell contains the minimum..maximum price for that half-day. If you don't have a pattern, this likely means that this is the first week that you bought turnips from Daisy in your farm - and this tool won't work for you. Check back next week!</caption>
+	<caption></caption>
 	<thead>
 	<tr>
 	  <th>Pattern</th>
@@ -129,6 +129,11 @@ th, td {
 	}
 	
 	function processRequest(request, previousPattern) {
+		if(!request.response.hasOwnProperty("values")) {
+			document.getElementById("user").innerHTML = "Не удалось загрузить данные";
+			return;
+		}
+		
 		const row = request.response.values[0];
 		const buy_price = parseInt(row[1]);
 		let sell_prices = [buy_price, buy_price];
