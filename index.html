@@ -156,7 +156,7 @@ th, td {
 					out_line += "<td>" + day.min + "</td>"
 				}
 
-				if(i > sell_prices.length - 2) {
+				if(i > sell_prices.length - 2 || isNaN(sell_prices[i])) {
 					if(minLine[i] > prices[i].min || isNaN(minLine[i])) {
 						minLine[i] = prices[i].min;
 					}
