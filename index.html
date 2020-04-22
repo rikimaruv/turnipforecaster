@@ -153,16 +153,17 @@ th, td {
 		let output_possibilities = "";
 		let minLine = new Array(14);
 		let maxLine = new Array(14);
-		const analyzed_possibilities = analyze_possibilities(sell_prices, 0, previousPattern);
+		let predictor = new Predictor(sell_prices, 0, previous_pattern);
+  		const analyzed_possibilities = predictor.analyze_possibilities();
 		let previous_pattern_number;
 		for (let poss of analyzed_possibilities) {
 			let out_line = "<tr><td class='table-pattern'>" + poss.pattern_description + "</td>"
 			if (previous_pattern_number != poss.pattern_number) {
 			  previous_pattern_number = poss.pattern_number;
-			  pattern_count = analyzed_possibilities
+			  const pattern_count = analyzed_possibilities
 				.filter(val => val.pattern_number == poss.pattern_number)
 				.length;
-			  percentage_display = percent => Number.isFinite(percent) ? ((percent * 100).toPrecision(3) + '%') : '—';
+			  let percentage_display = percent => Number.isFinite(percent) ? ((percent * 100).toPrecision(3) + '%') : '—';
 			  
 			  out_line += "<td rowspan=" + pattern_count + ">" + percentage_display(poss.category_total_probability) + "</td>";
 			}
