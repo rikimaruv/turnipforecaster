@@ -153,7 +153,7 @@ th, td {
 		let output_possibilities = "";
 		let minLine = new Array(14);
 		let maxLine = new Array(14);
-		let predictor = new Predictor(sell_prices, 0, previous_pattern);
+		let predictor = new Predictor(sell_prices, 0, previousPattern);
   		const analyzed_possibilities = predictor.analyze_possibilities();
 		let previous_pattern_number;
 		for (let poss of analyzed_possibilities) {
